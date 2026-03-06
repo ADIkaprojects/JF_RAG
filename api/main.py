@@ -56,6 +56,12 @@ _cors_origins = os.getenv(
     "http://localhost:5173,http://localhost:3000,http://localhost:8080",
 ).split(",")
 
+# Always include the production Vercel domain and all preview deployments
+_cors_origins += [
+    "https://jf-rag-lyh4.vercel.app",
+    "https://*.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
