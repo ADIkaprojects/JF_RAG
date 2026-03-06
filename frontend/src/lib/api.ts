@@ -3,7 +3,9 @@
  * Base URL configurable via VITE_API_URL env var
  */
 
-export const BASE_URL = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:8000";
+export const BASE_URL =
+  (import.meta as any).env?.VITE_API_URL ??
+  "https://adikaprojects--jf-rag-backend-fastapi-app.modal.run";
 
 // ── Image query detection ────────────────────────────────────────────────────
 // When ANY of these keywords appear in the user's message, image result cards
