@@ -1,0 +1,54 @@
+# ============================================================
+# JF_RAG — Python Backend Dependencies
+# ============================================================
+
+# ── PDF parsing & OCR ─────────────────────────────────────
+pymupdf>=1.23.0             # fitz: native PDF text + image extraction
+pdfplumber>=0.10.0          # table extraction from PDFs
+pytesseract>=0.3.10         # OCR wrapper for Tesseract
+Pillow>=10.0.0              # image handling (PNG/JPEG/BMP)
+
+# ── Text embeddings ───────────────────────────────────────
+sentence-transformers>=2.7.0  # intfloat/e5-large-v2 + cross-encoder reranker
+transformers>=4.40.0          # HuggingFace model hub
+torch>=2.1.0                  # PyTorch (CPU; swap faiss-cpu for faiss-gpu if CUDA)
+
+# ── Image embeddings ──────────────────────────────────────
+open-clip-torch>=2.24.0     # openai/clip-vit-base-patch32 CLIP encoder
+
+# ── Vector stores & search ────────────────────────────────
+faiss-cpu>=1.7.4            # FAISS HNSW text + image indexes (use faiss-gpu for CUDA)
+rank_bm25>=0.2.2            # BM25 sparse retrieval
+
+# ── Caching ───────────────────────────────────────────────
+diskcache>=5.6.3            # SQLite-backed disk cache (replaces Redis)
+
+# ── Data processing ───────────────────────────────────────
+pandas>=2.0.0
+numpy>=1.26.0
+spacy>=3.7.0                # NER (requires: python -m spacy download en_core_web_trf)
+tiktoken>=0.7.0             # Token counting utilities
+
+# ── LLM providers ─────────────────────────────────────────
+ollama>=0.2.0               # Ollama local model client
+groq>=0.9.0                 # Groq cloud API (llama-3.3-70b-versatile, etc.)
+
+# ── API ───────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn>=0.29.0
+python-multipart>=0.0.9     # required for FastAPI file upload (Form + UploadFile)
+httpx>=0.27.0               # async HTTP client used by Groq SDK
+
+# ── Streamlit legacy UI ────────────────────────────────────
+streamlit>=1.35.0
+
+# ── Cloud storage (Cloudflare R2 / S3-compatible) ─────────
+boto3>=1.34.0               # S3-compatible client for R2 upload/download
+
+# ── Face recognition (unredaction tools) ──────────────────
+face_recognition>=1.3.0     # dlib-based face detection
+cv2>=0.0.0                  # OpenCV — install via: pip install opencv-python
+
+# ── Utilities ─────────────────────────────────────────────
+python-dotenv>=1.0.0        # .env file loading
+tqdm>=4.66.0                # progress bars

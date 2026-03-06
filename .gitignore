@@ -1,0 +1,130 @@
+# ============================================================
+# ROOT / BACKEND .gitignore
+# ============================================================
+
+# ── Secrets & credentials ───────────────────────────────────
+.env                        # API keys, Vapi IDs, R2 secrets
+.env.local
+.env.production
+.env.development
+*.pem                       # TLS certificates
+*.key                       # Private keys
+serviceAccountKey.json      # Firebase / GCP service account
+credentials.json            # OAuth / GCP credentials
+secrets/                    # Any secrets folder
+
+# ── Python runtime & packaging ──────────────────────────────
+__pycache__/                # Compiled bytecode cache
+*.py[cod]                   # .pyc / .pyo / .pyd files
+*$py.class
+*.pyo
+.Python
+*.egg-info/                 # Package metadata (generated)
+dist/                       # Python build output
+build/                      # Python build output
+
+# ── Virtual environments ────────────────────────────────────
+venv/                       # Standard Python venv
+.venv/
+env/
+ENV/
+.env/                       # Note: also matches bare .env dir (not the file — covered above)
+
+# ── ML model weights (all too large for git) ────────────────
+*.bin                       # HuggingFace / PyTorch binary weights
+*.pt                        # PyTorch checkpoint
+*.pth                       # PyTorch checkpoint
+*.gguf                      # GGUF quantised model (llama.cpp)
+*.safetensors               # SafeTensors weights
+*.pkl                       # Pickle — model or data
+*.joblib                    # scikit-learn serialised model
+*.onnx                      # ONNX exported model
+*.h5                        # Keras / HDF5 model
+*.hdf5
+*.npy                       # NumPy array dump
+*.npz                       # NumPy compressed array
+
+# ── Vector stores & indexes ─────────────────────────────────
+vectorstore/                # FAISS + Chroma root folder
+faiss_index/
+chroma_db/
+vector_store/
+*.faiss                     # FAISS index binary
+*.index                     # Generic index binary
+
+# ── Document corpus (large binary/text data) ────────────────
+data/                       # PDFs, CSVs, spreadsheets — not source code
+*.pdf
+*.csv
+*.xlsx
+*.xls
+*.docx
+*.doc
+*.pptx
+
+# ── Pipeline-generated output ───────────────────────────────
+processed/                  # chunks/, images/, image_meta/, pipeline_results.json
+
+# ── Runtime cache ───────────────────────────────────────────
+cache/                      # cache.db SQLite files (query response cache)
+*.db                        # SQLite databases
+*.db-shm                    # SQLite shared memory
+*.db-wal                    # SQLite write-ahead log
+*.cached
+
+# ── Face recognition reference images ───────────────────────
+known_faces/                # Binary images used for face-recognition lookups
+
+# ── Unredaction tool output ─────────────────────────────────
+unredacted/processed_photos/ # Processed / de-boxed images (generated output)
+
+# ── Tool & linter caches ────────────────────────────────────
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+sentence_transformers_cache/
+huggingface_cache/
+transformers_cache/
+torch_cache/
+
+# ── Jupyter ─────────────────────────────────────────────────
+.ipynb_checkpoints/         # Auto-saved notebook checkpoints
+
+# ── Node / frontend (root-level convenience rules) ──────────
+node_modules/               # npm/bun dependencies
+frontend/node_modules/
+frontend/dist/              # Vite production build output
+frontend/build/
+.next/
+
+# ── Lock files (bun — npm's package-lock.json is kept) ──────
+bun.lockb                   # Bun lockfile (binary, not human-readable)
+
+# ── Media & archives (too large) ────────────────────────────
+*.mp4
+*.mp3
+*.wav
+*.zip
+*.tar
+*.tar.gz
+*.gz
+*.7z
+
+# ── Generated structure dump ────────────────────────────────
+structure.txt               # Windows `tree` output — regenerate with: tree /F > structure.txt
+
+# ── OS & editor noise ───────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Logs ────────────────────────────────────────────────────
+*.log
+logs/
+processed/
+vectorstore/
+structure.txt
