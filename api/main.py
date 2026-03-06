@@ -56,8 +56,9 @@ _cors_origins = os.getenv(
     "http://localhost:5173,http://localhost:3000,http://localhost:8080",
 ).split(",")
 
-# Always include the production Vercel domain and all preview deployments
+# Always include the production Vercel domains and all preview deployments
 _cors_origins += [
+    "https://jfrag.vercel.app",
     "https://jf-rag-lyh4.vercel.app",
     "https://*.vercel.app",
 ]
