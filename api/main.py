@@ -183,10 +183,10 @@ async def startup_event():
 
         # ── BM25 index ───────────────────────────────────────────────────
         bm25_path = os.getenv("BM25_INDEX", BM25_PATH)
-        if Path(bm25_path).exists():
+        try:
             bm25_index, bm25_chunks = IndexLoader.load_bm25_index(bm25_path)
-        else:
-            logger.warning("⚠️  BM25 index not found — keyword search disabled")
+        except Exception as _bm25_err:
+            logger.warning(f"⚠️  BM25 index not loaded — keyword search disabled ({_bm25_err})")
             bm25_index, bm25_chunks = None, []
 
         # ── LLM Router ───────────────────────────────────────────────────
@@ -226,27 +226,21 @@ async def startup_event():
         image_faiss_dir = Path(os.getenv(
             "IMAGE_FAISS_DIR", "./vectorstore/image_faiss"
         ))
-        if image_faiss_dir.exists():
-            try:
-                img_index, img_chunks = ImageIndexLoader.load_image_faiss_index(
-                    str(image_faiss_dir)
-                )
-                image_retriever = ImageRetriever(
-                    image_faiss_index = img_index,
-                    image_chunks      = img_chunks,
-                    top_k             = 10,  # Default: can be overridden per-request
-                )
-                logger.info(
-                    f"   🖼️  Image index: ✅  "
-                    f"({img_index.ntotal} vectors, {len(img_chunks)} records)"
-                )
-            except Exception as e:
-                logger.warning(f"   ⚠️  Image index failed to load: {e} — image search disabled")
-                image_retriever = ImageRetriever()   # empty, search disabled
-        else:
-            logger.info(
-                "   🖼️  Image index not found — run orchestrate.py --images first"
+        try:
+            img_index, img_chunks = ImageIndexLoader.load_image_faiss_index(
+                str(image_faiss_dir)
             )
+            image_retriever = ImageRetriever(
+                image_faiss_index = img_index,
+                image_chunks      = img_chunks,
+                top_k             = 10,
+            )
+            logger.info(
+                f"   🖼️  Image index: ✅  "
+                f"({img_index.ntotal} vectors, {len(img_chunks)} records)"
+            )
+        except Exception as e:
+            logger.warning(f"   ⚠️  Image index failed to load: {e} — image search disabled")
             image_retriever = ImageRetriever()       # empty, search disabled
 
         logger.info("✅ RAG system initialised")
