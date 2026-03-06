@@ -47,7 +47,7 @@ boto3>=1.34.0               # S3-compatible client for R2 upload/download
 
 # ── Face recognition (unredaction tools) ──────────────────
 face_recognition>=1.3.0     # dlib-based face detection
-cv2>=0.0.0                  # OpenCV — install via: pip install opencv-python
+opencv-python-headless>=4.8.0  # OpenCV (headless — no GUI, smaller, for servers)
 
 # ── Utilities ─────────────────────────────────────────────
 python-dotenv>=1.0.0        # .env file loading
