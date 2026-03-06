@@ -1,8 +1,40 @@
 # JF_RAG — Jeffrey's Archive
 
 > A production-grade fullstack **MultiModal RAG** (Retrieval-Augmented Generation) system purpose-built for investigative and legal document research.  
-> Ingests **PDFs, scanned images, and CSV records**. Retrieves using hybrid BM25 + FAISS with HyDE, query rewriting, cross-encoder reranking, and parent-child context expansion. Generates answers via Groq or Ollama. Ships with a polished React + TypeScript frontend and a Vapi-powered AI voice assistant.  
-> **No Docker required — runs entirely locally.**
+> Ingests **PDFs, scanned images, and CSV records**. Retrieves using hybrid BM25 + FAISS with HyDE, query rewriting, cross-encoder reranking, and parent-child context expansion. Generates answers via Groq or Ollama. Ships with a polished React + TypeScript frontend and a Vapi-powered AI voice assistant.
+
+---
+
+## 🚀 Live Deployment
+
+| Service | URL | Platform | Status |
+|---|---|---|---|
+| **Frontend** | [https://jfrag.vercel.app](https://jfrag.vercel.app) | Vercel | ✅ Live |
+| **Backend API** | [https://adikaprojects--jf-rag-backend-fastapi-app.modal.run](https://adikaprojects--jf-rag-backend-fastapi-app.modal.run) | Modal.run | ✅ Live |
+| **API Health** | [/health](https://adikaprojects--jf-rag-backend-fastapi-app.modal.run/health) | Modal.run | ✅ Live |
+| **API Docs** | [/docs](https://adikaprojects--jf-rag-backend-fastapi-app.modal.run/docs) | Modal.run | ✅ Live |
+
+### Infrastructure
+
+| Component | Detail |
+|---|---|
+| **Frontend host** | Vercel — auto-deploys from `main` branch on every push |
+| **Backend host** | Modal.run — Python 3.11 container, 4 GB RAM, 2 vCPU, scales to zero |
+| **Vector indexes** | Cloudflare R2 (`jf-rag-data` bucket) — FAISS text, BM25, image FAISS |
+| **LLM** | Groq API (`llama-3.3-70b-versatile`) with key rotation |
+| **Cold start** | ~30s (models pre-baked into Modal image layer) |
+| **Idle scale-down** | 5 minutes after last request |
+
+### Redeploy (backend)
+
+```powershell
+cd d:\JF_RAG
+Remove-Item Env:MODAL_TOKEN_ID -ErrorAction SilentlyContinue
+Remove-Item Env:MODAL_TOKEN_SECRET -ErrorAction SilentlyContinue
+modal deploy modal_app.py
+```
+
+Frontend redeploys automatically on every `git push` to `main`.
 
 ---
 
@@ -171,7 +203,7 @@ JF_RAG/
 | **Performance metrics** | In-memory request latency + provider tracking, accessible via `/status` |
 | **Static image serving** | Dev: `StaticFiles` at `/images/`; Production: custom endpoint fetching from R2 |
 | **File upload Q&A** | `/query-file` accepts image + PDF uploads alongside a text query |
-| **CORS** | Configured for `localhost:5173`, `3000`, `8080` |
+| **CORS** | Configured for `localhost:5173`, `3000`, `8080`, `jfrag.vercel.app`, and all `*.vercel.app` preview URLs |
 
 ### Frontend
 
@@ -780,6 +812,55 @@ brew install cmake
 
 ## Deployment
 
+### Live production stack
+
+| Layer | Service | Notes |
+|---|---|---|
+| Frontend | [Vercel](https://vercel.com) | Root directory: `frontend/`. Auto-deploys on push to `main`. |
+| Backend | [Modal.run](https://modal.com) | `modal_app.py` — Python 3.11, 4 GB RAM, 2 vCPU, `scaledown_window=300s` |
+| Vector indexes | Cloudflare R2 | FAISS text, BM25 (`bm25.pkl`), image FAISS — fetched at startup by `IndexLoader` via `file_resolver.py` |
+| Secrets | Modal secret `jf-rag-secrets` | `GROQ_API_KEYS`, `R2_*`, `ENVIRONMENT=production`, etc. |
+
+### Deploy backend to Modal
+
+```powershell
+# Authenticate (one-time or after token expiry)
+modal token new
+
+# Deploy
+cd d:\JF_RAG
+Remove-Item Env:MODAL_TOKEN_ID -ErrorAction SilentlyContinue
+Remove-Item Env:MODAL_TOKEN_SECRET -ErrorAction SilentlyContinue
+modal deploy modal_app.py
+```
+
+### Deploy frontend to Vercel
+
+Frontend auto-deploys on every `git push` to `main`.  
+Manual deploy:
+```bash
+cd frontend
+npx vercel --prod
+```
+
+`frontend/vercel.json` is present in the repo — Vercel reads it automatically when Root Directory is set to `frontend/` in the dashboard.
+
+### Add a new allowed frontend origin (CORS)
+
+Edit `api/main.py` → `_cors_origins` list → commit → `modal deploy modal_app.py`.
+
+### Upload / refresh index files to R2
+
+Run once locally after re-indexing:
+```bash
+python -c "
+from lib.file_resolver import upload_local_file
+for f in ['vectorstore/bm25.pkl','vectorstore/faiss/index.bin','vectorstore/faiss/chunks.json',
+          'vectorstore/image_faiss/index.bin','vectorstore/image_faiss/chunks.json']:
+    upload_local_file(f, f); print('uploaded', f)
+"
+```
+
 ### Local development (default)
 
 ```bash
@@ -795,29 +876,11 @@ ollama serve
 
 ### Production checklist
 
-1. Set `ENVIRONMENT=production` in `.env`
-2. Upload all indexes to R2: `python scripts/upload_to_r2.py`
-3. Build the frontend: `cd frontend && npm run build`
-4. Serve the FastAPI app behind a reverse proxy (nginx / Caddy) with HTTPS
-5. Point `VITE_API_URL` at your production domain
-6. Ensure Vapi assistant is configured and IDs are in `.env`
-7. Set `GROQ_API_KEYS` with enough keys for your expected query volume
-
-### Docker (optional)
-
-The project runs without Docker. If you want to containerise it:
-
-```dockerfile
-# Minimal example
-FROM python:3.13-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-Build the frontend separately and serve its `dist/` via nginx or FastAPI `StaticFiles`.
+1. Set `ENVIRONMENT=production` in Modal secret `jf-rag-secrets`
+2. Upload all indexes to R2 (see above)
+3. Ensure `GROQ_API_KEYS` in Modal secret has enough keys for expected query volume
+4. `modal deploy modal_app.py`
+5. Verify at [/health](https://adikaprojects--jf-rag-backend-fastapi-app.modal.run/health)
 
 ---
 
