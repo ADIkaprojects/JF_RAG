@@ -146,14 +146,24 @@ const Index = () => {
   }, [handleSend]);
 
   const handleLike = useCallback((msg: ChatMessage, userQuery: string) => {
-    addLike({ query: userQuery, answer: msg.content, sources: msg.sources });
-    setLikedMsgIds((prev) => new Set(prev).add(msg.id));
-  }, [addLike]);
+    if (likedMsgIds.has(msg.id)) {
+      // Toggle off — remove from liked
+      const existing = likedMessages.find(m => m.query === userQuery);
+      if (existing) removeLike(existing.id);
+      setLikedMsgIds((prev) => { const next = new Set(prev); next.delete(msg.id); return next; });
+    } else {
+      addLike({ query: userQuery, answer: msg.content, sources: msg.sources });
+      setLikedMsgIds((prev) => new Set(prev).add(msg.id));
+    }
+  }, [addLike, likedMsgIds, likedMessages, removeLike]);
 
   const handleDislike = useCallback(async (userQuery: string) => {
     if (!userQuery) return;
+    // Also remove from liked messages if present
+    const existing = likedMessages.find(m => m.query === userQuery);
+    if (existing) removeLike(existing.id);
     try { await api.cacheDeleteEntry(userQuery); } catch { /* ignore */ }
-  }, []);
+  }, [likedMessages, removeLike]);
 
   // Initialize a fresh session on first mount
   useEffect(() => {

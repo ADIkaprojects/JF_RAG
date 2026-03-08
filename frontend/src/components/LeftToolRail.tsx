@@ -234,7 +234,7 @@ const LeftToolRail = ({
                   No liked responses yet. Click the thumbs-up on any answer!
                 </p>
               ) : (
-                <div className="max-h-[300px] overflow-y-auto space-y-1.5 pr-1">
+                <div className="max-h-[200px] overflow-y-auto space-y-1.5 pr-1">
                   {likedMessages.map((item) => (
                     <div key={item.id} className="rounded-xl overflow-hidden transition-colors duration-300"
                       style={{ background: `hsl(var(--feature-card-bg))`, border: `1px solid hsl(var(--feature-card-border))` }}>
@@ -456,11 +456,12 @@ const LeftToolRail = ({
                     animate={{ opacity: 1, x: 0, scale: 1 }}
                     exit={{ opacity: 0, x: -8, scale: 0.96 }}
                     transition={{ duration: 0.18, ease: "easeOut" }}
-                    className="absolute left-[calc(100%+10px)] top-0 w-[280px] rounded-2xl p-4 z-50 transition-colors duration-300"
+                    className="absolute left-[calc(100%+10px)] top-0 w-[280px] rounded-2xl p-4 z-50 overflow-y-auto transition-colors duration-300"
                     style={{
                       background: `hsl(var(--feature-card-bg))`,
                       border: `1px solid hsl(var(--feature-card-border))`,
                       boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+                      maxHeight: "min(80vh, 700px)",
                     }}
                   >
                     {renderPanel(id)}
