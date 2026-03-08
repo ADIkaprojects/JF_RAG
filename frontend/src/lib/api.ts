@@ -144,4 +144,10 @@ export const api = {
   cacheStats: () => request<CacheStats>("/cache/stats"),
 
   cacheClear: () => request<{ status: string }>("/cache/clear", { method: "POST" }),
+
+  cacheDeleteEntry: (query: string) =>
+    request<{ status: string }>("/cache/delete-entry", {
+      method: "POST",
+      body: JSON.stringify({ query }),
+    }),
 };

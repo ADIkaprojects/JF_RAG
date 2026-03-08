@@ -8,6 +8,7 @@ import VoiceOverlay from "@/components/VoiceOverlay";
 import { api, isImageQuery, type QueryRequest } from "@/lib/api";
 import { useTheme } from "@/hooks/useTheme";
 import { useConversationHistory, type Session } from "@/hooks/useConversationHistory";
+import { useLikedMessages } from "@/hooks/useLikedMessages";
 
 const Index = () => {
   const { theme, toggleTheme } = useTheme();
@@ -24,6 +25,11 @@ const Index = () => {
     deleteSession,
     createNewSession,
   } = useConversationHistory();
+
+  const { likedMessages, addLike, removeLike } = useLikedMessages();
+
+  // Track which assistant message IDs the user has liked (for ThumbsUp highlight)
+  const [likedMsgIds, setLikedMsgIds] = useState<Set<string>>(new Set());
 
   // Feature 4: voice overlay
   const [voiceOverlayOpen, setVoiceOverlayOpen] = useState(false);
@@ -132,6 +138,22 @@ const Index = () => {
       setIsLoading(false);
     }
   }, [settings]);
+
+  const handleRetry = useCallback(async (userQuery: string) => {
+    if (!userQuery) return;
+    try { await api.cacheDeleteEntry(userQuery); } catch { /* ignore */ }
+    handleSend(userQuery);
+  }, [handleSend]);
+
+  const handleLike = useCallback((msg: ChatMessage, userQuery: string) => {
+    addLike({ query: userQuery, answer: msg.content, sources: msg.sources });
+    setLikedMsgIds((prev) => new Set(prev).add(msg.id));
+  }, [addLike]);
+
+  const handleDislike = useCallback(async (userQuery: string) => {
+    if (!userQuery) return;
+    try { await api.cacheDeleteEntry(userQuery); } catch { /* ignore */ }
+  }, []);
 
   // Initialize a fresh session on first mount
   useEffect(() => {
@@ -327,6 +349,8 @@ const Index = () => {
           onDeleteSession={handleDeleteSession}
           settings={settings}
           onSettingsChange={setSettings}
+          likedMessages={likedMessages}
+          onRemoveLike={removeLike}
         />
 
         {/* Main workspace */}
@@ -339,6 +363,10 @@ const Index = () => {
               onSend={handleSend}
               isLoading={isLoading}
               onVoiceOpen={handleVoiceOpen}
+              onRetry={handleRetry}
+              onLike={handleLike}
+              onDislike={handleDislike}
+              likedIds={likedMsgIds}
             />
           )}
         </main>

@@ -1052,6 +1052,19 @@ async def cache_stats():
     return {"cache_dir": CACHE_DIR, "size": len(cache)}
 
 
+class CacheDeleteRequest(BaseModel):
+    query: str
+
+
+@app.post("/cache/delete-entry")
+async def cache_delete_entry(req: CacheDeleteRequest):
+    cache_key = "rag:" + hashlib.sha256(req.query.encode()).hexdigest()[:32]
+    existed = cache_key in cache
+    if existed:
+        del cache[cache_key]
+    return {"status": "deleted" if existed else "not_found"}
+
+
 @app.get("/")
 async def root():
     return {

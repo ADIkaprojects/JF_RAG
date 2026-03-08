@@ -33,6 +33,10 @@ interface ChatViewProps {
   onSend: (message: string, file?: File) => void;
   isLoading: boolean;
   onVoiceOpen?: () => void;  // Feature 4: passed through to PromptInput
+  onRetry?: (userQuery: string) => void;
+  onLike?: (msg: ChatMessage, userQuery: string) => void;
+  onDislike?: (userQuery: string) => void;
+  likedIds?: Set<string>;
 }
 
 const ProviderBadge = ({ provider, model, cached, hydeUsed }: {
@@ -113,7 +117,7 @@ const ThinkingDots = () => (
   </div>
 );
 
-const ChatView = ({ messages, onSend, isLoading, onVoiceOpen }: ChatViewProps) => {
+const ChatView = ({ messages, onSend, isLoading, onVoiceOpen, onRetry, onLike, onDislike, likedIds }: ChatViewProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const [expandedSources, setExpandedSources] = useState<string | null>(null);
 
@@ -245,11 +249,36 @@ const ChatView = ({ messages, onSend, isLoading, onVoiceOpen }: ChatViewProps) =
                     {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </span>
                   <div className="flex gap-1 ml-auto">
-                    {[RotateCcw, ThumbsUp, ThumbsDown].map((Icon, i) => (
-                      <button key={i} className="w-6 h-6 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground hover:bg-white/5 transition-all">
-                        <Icon size={11} />
-                      </button>
-                    ))}
+                    {(() => {
+                      const userQuery = messages.slice(0, msgIdx).reverse().find(m => m.role === "user")?.content ?? "";
+                      const isLiked = likedIds?.has(msg.id) ?? false;
+                      return (
+                        <>
+                          <button
+                            title="Retry"
+                            onClick={() => onRetry?.(userQuery)}
+                            className="w-6 h-6 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground hover:bg-white/5 transition-all"
+                          >
+                            <RotateCcw size={11} />
+                          </button>
+                          <button
+                            title={isLiked ? "Unlike" : "Like"}
+                            onClick={() => onLike?.(msg, userQuery)}
+                            className="w-6 h-6 rounded-lg flex items-center justify-center transition-all hover:bg-white/5"
+                            style={{ color: isLiked ? "hsl(142 60% 60%)" : undefined }}
+                          >
+                            <ThumbsUp size={11} className={isLiked ? "" : "text-muted-foreground/40 hover:text-muted-foreground"} />
+                          </button>
+                          <button
+                            title="Dislike (removes from cache)"
+                            onClick={() => onDislike?.(userQuery)}
+                            className="w-6 h-6 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground hover:bg-white/5 transition-all"
+                          >
+                            <ThumbsDown size={11} />
+                          </button>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>

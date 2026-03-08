@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import React from "react";
 import {
   Plus, Search, SlidersHorizontal, Database, Activity,
-  Settings, CheckCircle2, XCircle, Trash2, Loader2, Brain
+  Settings, CheckCircle2, XCircle, Trash2, Loader2, Brain, Heart, ChevronDown
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, type StatusResponse, type CacheStats } from "@/lib/api";
 import type { Session } from "@/hooks/useConversationHistory";
+import type { LikedMessage } from "@/hooks/useLikedMessages";
 
 interface Settings {
   topK: number;
@@ -27,6 +28,8 @@ interface LeftToolRailProps {
   onDeleteSession: (id: string) => void;
   settings: Settings;
   onSettingsChange: (s: Settings) => void;
+  likedMessages?: LikedMessage[];
+  onRemoveLike?: (id: string) => void;
 }
 
 const tools = [
@@ -49,10 +52,13 @@ const LeftToolRail = ({
   onDeleteSession,
   settings,
   onSettingsChange,
+  likedMessages = [],
+  onRemoveLike,
 }: LeftToolRailProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mobileNavRef = useRef<HTMLElement | null>(null);
   const [openPanel, setOpenPanel] = useState<string | null>(null);
+  const [expandedLiked, setExpandedLiked] = useState<string | null>(null);
   const [statusData, setStatusData] = useState<StatusResponse | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
   const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
@@ -212,6 +218,70 @@ const LeftToolRail = ({
                       </div>
                     );
                   })}
+                </div>
+              )}
+            </div>
+
+            {/* Liked Messages */}
+            <div className="pt-1">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Heart size={11} className="text-accent/60" />
+                <p className="text-[11px] text-muted-foreground">Liked messages</p>
+              </div>
+
+              {likedMessages.length === 0 ? (
+                <p className="text-[11px] text-muted-foreground/60 italic">
+                  No liked responses yet. Click the thumbs-up on any answer!
+                </p>
+              ) : (
+                <div className="max-h-[300px] overflow-y-auto space-y-1.5 pr-1">
+                  {likedMessages.map((item) => (
+                    <div key={item.id} className="rounded-xl overflow-hidden transition-colors duration-300"
+                      style={{ background: `hsl(var(--feature-card-bg))`, border: `1px solid hsl(var(--feature-card-border))` }}>
+                      <div className="flex items-start gap-2 px-2.5 py-2 group">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] text-foreground font-medium truncate">{item.query}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            {formatRelativeTime(item.timestamp)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            title="Expand answer"
+                            onClick={() => setExpandedLiked(expandedLiked === item.id ? null : item.id)}
+                            className="w-5 h-5 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground hover:bg-white/5 transition-all"
+                          >
+                            <ChevronDown size={10} className={`transition-transform ${expandedLiked === item.id ? "rotate-180" : ""}`} />
+                          </button>
+                          <button
+                            type="button"
+                            title="Remove like"
+                            onClick={() => onRemoveLike?.(item.id)}
+                            className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-lg flex items-center justify-center text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
+                          >
+                            <Trash2 size={10} />
+                          </button>
+                        </div>
+                      </div>
+                      <AnimatePresence>
+                        {expandedLiked === item.id && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.18 }}
+                            className="overflow-hidden border-t transition-colors duration-300"
+                            style={{ borderColor: `hsl(var(--feature-card-border))` }}
+                          >
+                            <p className="px-2.5 py-2 text-[11px] text-foreground/80 leading-relaxed line-clamp-6">
+                              {item.answer}
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
