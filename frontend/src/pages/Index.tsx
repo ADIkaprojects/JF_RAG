@@ -269,7 +269,7 @@ const Index = () => {
   }, [settings]);
 
   return (
-    <div className="min-h-screen page-gradient flex items-center justify-center p-3 md:p-5">
+    <div className="min-h-screen page-gradient flex md:items-center md:justify-center md:p-3 md:p-5">
       {/* Ambient background orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-20%] left-[10%] w-[600px] h-[600px] rounded-full"
@@ -279,15 +279,15 @@ const Index = () => {
       </div>
 
       {/* Main container */}
-      <div className="relative w-full max-w-[1440px] h-[min(92vh,900px)] glass-container rounded-3xl flex overflow-hidden">
+      <div className="relative w-full md:max-w-[1440px] h-[100dvh] md:h-[min(92vh,900px)] glass-container md:rounded-3xl flex overflow-hidden">
 
         {/* Subtle top border glow */}
         <div className="absolute top-0 left-[20%] right-[20%] h-px"
           style={{ background: "linear-gradient(90deg, transparent, hsl(198 90% 56% / 0.3), transparent)" }} />
 
         {/* Header bar */}
-        <div className="absolute top-0 left-0 right-0 h-12 flex items-center justify-between z-20 px-6">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/80 ml-32">
+        <div className="absolute top-0 left-0 right-0 h-12 flex items-center justify-between z-20 px-4 md:px-6">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/80 ml-4 md:ml-32">
             <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
             <span className="text-xs font-medium text-muted-foreground tracking-wide">
               {view === "chat" ? "MultiModal RAG" : "MultiModal RAG — Ready"}
@@ -330,7 +330,7 @@ const Index = () => {
         />
 
         {/* Main workspace */}
-        <main className="flex-1 min-w-0 flex flex-col pt-12">
+        <main className="flex-1 min-w-0 flex flex-col pt-12 pb-16 md:pb-0">
           {view === "home" ? (
             <HomeDashboard onSend={handleSend} onVoiceOpen={handleVoiceOpen} />
           ) : (

@@ -40,7 +40,7 @@ const quickActions = [
 
 const HomeDashboard = ({ onSend, onVoiceOpen }: HomeDashboardProps) => {
   return (
-    <div className="flex flex-col items-center justify-center h-full px-8 py-6 gap-8 overflow-y-auto">
+    <div className="flex flex-col items-center justify-center h-full px-4 sm:px-6 md:px-8 py-4 md:py-6 gap-6 md:gap-8 overflow-y-auto">
 
       {/* Hero text */}
       <motion.div
@@ -59,7 +59,7 @@ const HomeDashboard = ({ onSend, onVoiceOpen }: HomeDashboardProps) => {
           MultiModal RAG System
         </div>
 
-        <h1 className="text-5xl font-normal leading-tight mb-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-normal leading-tight mb-4">
           <span className="text-gradient">Ask anything</span>
           <br />
           <span className="text-muted-foreground" style={{ fontFamily: "Instrument Serif, serif", fontStyle: "italic" }}>
@@ -82,7 +82,7 @@ const HomeDashboard = ({ onSend, onVoiceOpen }: HomeDashboardProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 + i * 0.08 }}
             whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className="w-[220px] rounded-2xl p-4 flex flex-col gap-3 cursor-default transition-colors duration-300"
+            className="w-full sm:w-[calc(50%-8px)] md:w-[220px] rounded-2xl p-4 flex flex-col gap-3 cursor-default transition-colors duration-300"
             style={{
               background: `hsl(var(--feature-card-bg))`,
               border: `1px solid hsl(var(--feature-card-border))`,

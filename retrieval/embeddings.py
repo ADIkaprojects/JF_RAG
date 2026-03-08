@@ -59,7 +59,8 @@ class EmbeddingManager:
       • Added embed_batch helper that matches notebook's batch-with-stats pattern
     """
 
-    def __init__(self, model_name: str = "intfloat/e5-base-v2"):
+    def __init__(self, model_name: str = "intfloat/e5-base-v2",
+                 use_fp16: bool = False):
         """
         Initialise embedding model.
 
@@ -67,10 +68,16 @@ class EmbeddingManager:
           intfloat/e5-base-v2    – 768-dim, ~2× faster than e5-large  ← default
           intfloat/e5-small-v2   – 384-dim, ~4× faster
           BAAI/bge-small-en-v1.5 – 384-dim, very fast, strong retrieval
+
+        Set use_fp16=True to halve peak RAM (~50% reduction) by converting
+        model weights to float16 after loading.
         """
         self.model_name = model_name
         logger.info(f"🚀 Loading embedding model: {model_name} on {DEVICE}")
-        self.model         = SentenceTransformer(model_name, device=DEVICE)
+        self.model = SentenceTransformer(model_name, device=DEVICE)
+        if use_fp16:
+            self.model = self.model.half()
+            logger.info("   Using float16 (half precision) to reduce RAM")
         self.embedding_dim = self.model.get_sentence_embedding_dimension()
         logger.info(f"   Embedding dimension: {self.embedding_dim}")
 

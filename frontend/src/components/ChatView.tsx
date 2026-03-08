@@ -124,7 +124,7 @@ const ChatView = ({ messages, onSend, isLoading, onVoiceOpen }: ChatViewProps) =
   return (
     <div className="flex flex-col h-full">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-5">
         {messages.map((msg, msgIdx) => (
           <motion.div
             key={msg.id}
@@ -134,7 +134,7 @@ const ChatView = ({ messages, onSend, isLoading, onVoiceOpen }: ChatViewProps) =
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.role === "user" ? (
-              <div className="max-w-[70%] px-5 py-3 rounded-2xl rounded-tr-sm text-sm leading-relaxed font-medium flex items-center gap-2"
+              <div className="max-w-[85%] sm:max-w-[70%] px-4 sm:px-5 py-3 rounded-2xl rounded-tr-sm text-sm leading-relaxed font-medium flex items-center gap-2"
                 style={{
                   background: "hsl(198 90% 56%)",
                   color: "hsl(220 16% 7%)",
@@ -147,7 +147,7 @@ const ChatView = ({ messages, onSend, isLoading, onVoiceOpen }: ChatViewProps) =
                 )}
               </div>
             ) : (
-              <div className="max-w-[80%] min-w-0">
+              <div className="max-w-[92%] sm:max-w-[80%] min-w-0">
                 {/* Guardrail notice */}
                 {msg.metadata?.guardrailTriggered && (
                   <div className="flex items-center gap-2 mb-2 text-xs px-3 py-1.5 rounded-lg"
@@ -262,7 +262,7 @@ const ChatView = ({ messages, onSend, isLoading, onVoiceOpen }: ChatViewProps) =
       </div>
 
       {/* Input */}
-      <div className="px-6 pb-5 pt-2">
+      <div className="px-3 sm:px-6 pb-5 pt-2">
         <PromptInput
           onSend={onSend}
           disabled={isLoading}

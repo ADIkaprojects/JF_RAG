@@ -229,7 +229,7 @@ const PromptInput = ({ onSend, disabled, onVoiceOpen }: PromptInputProps) => {
       </div>
 
       <div className="px-4 pb-2 flex items-center justify-between">
-        <span className="text-[10px] text-muted-foreground/30">
+        <span className="hidden sm:inline text-[10px] text-muted-foreground/30">
           Enter to send · Shift+Enter for newline
         </span>
         {file && (

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import React from "react";
 import {
   Plus, Search, SlidersHorizontal, Database, Activity,
   Settings, CheckCircle2, XCircle, Trash2, Loader2, Brain
@@ -50,6 +51,7 @@ const LeftToolRail = ({
   onSettingsChange,
 }: LeftToolRailProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const mobileNavRef = useRef<HTMLElement | null>(null);
   const [openPanel, setOpenPanel] = useState<string | null>(null);
   const [statusData, setStatusData] = useState<StatusResponse | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
@@ -61,9 +63,10 @@ const LeftToolRail = ({
   useEffect(() => {
     const handleGlobalClick = (event: MouseEvent | TouchEvent) => {
       if (!openPanel) return;
-      const container = containerRef.current;
-      if (!container) return;
-      if (!container.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const inDesktop = containerRef.current?.contains(target);
+      const inMobile = mobileNavRef.current?.contains(target);
+      if (!inDesktop && !inMobile) {
         setOpenPanel(null);
       }
     };
@@ -350,52 +353,102 @@ const LeftToolRail = ({
   };
 
   return (
-    <nav
-      ref={containerRef}
-      className="hidden md:flex w-[68px] flex-col items-center py-5 gap-3 glass-rail rounded-l-3xl border-r border-white/[0.04] relative z-10"
-    >
-      {tools.map(({ id, icon: Icon, label }) => {
-        const isOpen = openPanel === id;
-        return (
-          <div key={id} className="relative">
-            <motion.button
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={() => handleClick(id)}
-              title={label}
-              className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150"
+    <>
+      {/* Desktop: vertical left rail */}
+      <nav
+        ref={containerRef}
+        className="hidden md:flex w-[68px] flex-col items-center py-5 gap-3 glass-rail rounded-l-3xl border-r border-white/[0.04] relative z-10"
+      >
+        {tools.map(({ id, icon: Icon, label }) => {
+          const isOpen = openPanel === id;
+          return (
+            <div key={id} className="relative">
+              <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={() => handleClick(id)}
+                title={label}
+                className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-150"
+                style={{
+                  background: isOpen ? "hsl(var(--button-bg-active))" : "hsl(var(--button-bg-inactive))",
+                  border: `1px solid ${isOpen ? "transparent" : "hsl(var(--button-text-inactive) / 0.2)"}`,
+                  color: isOpen ? "hsl(var(--button-text-active))" : "hsl(var(--button-text-inactive))",
+                  boxShadow: isOpen ? "0 4px 16px hsl(198 90% 56% / 0.3)" : "none",
+                }}
+              >
+                <Icon size={18} />
+              </motion.button>
+
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -8, scale: 0.96 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: -8, scale: 0.96 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="absolute left-[calc(100%+10px)] top-0 w-[280px] rounded-2xl p-4 z-50 transition-colors duration-300"
+                    style={{
+                      background: `hsl(var(--feature-card-bg))`,
+                      border: `1px solid hsl(var(--feature-card-border))`,
+                      boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+                    }}
+                  >
+                    {renderPanel(id)}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+      </nav>
+
+      {/* Mobile / tablet: horizontal bottom bar */}
+      <nav
+        ref={mobileNavRef as React.RefObject<HTMLElement>}
+        className="md:hidden fixed bottom-0 left-0 right-0 flex flex-row items-center justify-around px-2 py-2 z-30 glass-rail border-t border-white/[0.04]"
+      >
+        {/* Panel sheet — slides up above the bar */}
+        <AnimatePresence>
+          {openPanel && (
+            <motion.div
+              initial={{ opacity: 0, y: 12, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.97 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="absolute bottom-full left-3 right-3 mb-2 rounded-2xl p-4 z-50 overflow-y-auto transition-colors duration-300"
               style={{
-                background: isOpen ? "hsl(var(--button-bg-active))" : "hsl(var(--button-bg-inactive))",
-                border: `1px solid ${isOpen ? "transparent" : "hsl(var(--button-text-inactive) / 0.2)"}`,
-                color: isOpen ? "hsl(var(--button-text-active))" : "hsl(var(--button-text-inactive))",
-                boxShadow: isOpen ? "0 4px 16px hsl(198 90% 56% / 0.3)" : "none",
+                background: `hsl(var(--feature-card-bg))`,
+                border: `1px solid hsl(var(--feature-card-border))`,
+                boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
+                maxHeight: "60vh",
               }}
             >
-              <Icon size={18} />
-            </motion.button>
+              {renderPanel(openPanel)}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-            <AnimatePresence>
-              {isOpen && (
-                <motion.div
-                  initial={{ opacity: 0, x: -8, scale: 0.96 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -8, scale: 0.96 }}
-                  transition={{ duration: 0.18, ease: "easeOut" }}
-                  className="absolute left-[calc(100%+10px)] top-0 w-[280px] rounded-2xl p-4 z-50 transition-colors duration-300"
-                  style={{
-                    background: `hsl(var(--feature-card-bg))`,
-                    border: `1px solid hsl(var(--feature-card-border))`,
-                    boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  {renderPanel(id)}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        );
-      })}
-    </nav>
+        {tools.map(({ id, icon: Icon, label }) => {
+          const isOpen = openPanel === id;
+          return (
+            <motion.button
+              key={id}
+              whileTap={{ scale: 0.88 }}
+              onClick={() => handleClick(id)}
+              title={label}
+              className="flex-1 h-11 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all duration-150"
+              style={{
+                background: isOpen ? "hsl(var(--button-bg-active))" : "transparent",
+                color: isOpen ? "hsl(var(--button-text-active))" : "hsl(var(--button-text-inactive))",
+              }}
+            >
+              <Icon size={17} />
+              <span className="text-[9px] font-medium leading-none">{label.split(" ")[0]}</span>
+            </motion.button>
+          );
+        })}
+      </nav>
+    </>
   );
 };
 
